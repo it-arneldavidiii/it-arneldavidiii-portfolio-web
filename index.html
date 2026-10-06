@@ -1,12 +1,13 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <script src="transition.js"></script>
     <script>
       document.documentElement.classList.add("js");
     </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-
+    <meta name="color-scheme" content="dark" />
     <title>Arnel David III | Portfolio</title>
     <meta
       name="description"
@@ -15,19 +16,19 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Urbanist:ital,wght@0,100..900;1,100..900&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Urbanist:wght@200..800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="homepage-style.css" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="home.css" />
   </head>
 
   <body>
     <header class="site-header">
       <a class="logo">Arnel David III</a>
       <nav>
-        <a href="projects.html">Experience</a>
+        <a href="index.html" aria-current="page">Home</a>
         <a href="about.html">About</a>
-        <a href="resume/Arnel David III - Resume.pdf" target="_blank">Resume</a>
         <a href="#contact">Contact</a>
       </nav>
     </header>
@@ -136,7 +137,6 @@
 
     <footer class="site-footer" id="contact">
       <p>Want to work together?</p>
-      <!-- EDIT: use your real email and profile links -->
       <a class="email" href="mailto:it.arneldavidiii@gmail.com"
         >it.arneldavidiii@gmail.com</a
       >
@@ -161,16 +161,14 @@
     </script>
 
     <script>
-      const DURATION = 1200; // scroll time in milliseconds (1000 = 1 second)
+      const DURATION = 1200;
 
       function easeInOut(t) {
         return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
       }
 
-      function scrollToTarget(target) {
-        const offset = 90; // height of your sticky bar, adjust to match
+      function scrollToY(end) {
         const start = window.scrollY;
-        const end = target.getBoundingClientRect().top + start - offset;
         const distance = end - start;
         const startTime = performance.now();
 
@@ -183,6 +181,11 @@
         requestAnimationFrame(step);
       }
 
+      function scrollToTarget(target) {
+        const offset = 90;
+        scrollToY(target.getBoundingClientRect().top + window.scrollY - offset);
+      }
+
       document.querySelectorAll('a[href^="#"]').forEach((link) => {
         link.addEventListener("click", (e) => {
           const target = document.querySelector(link.getAttribute("href"));
@@ -191,6 +194,52 @@
           scrollToTarget(target);
         });
       });
+
+      document.querySelectorAll(".logo, nav a").forEach((link) => {
+        link.addEventListener("click", (e) => {
+          const href = link.getAttribute("href");
+          if (!href || href.startsWith("#") || link.target === "_blank") return;
+
+          const normalize = (path) => path.replace(/\/$/, "/index.html");
+          const url = new URL(href, location.href);
+
+          if (
+            normalize(url.pathname) === normalize(location.pathname) &&
+            !url.hash
+          ) {
+            e.preventDefault();
+            scrollToY(0);
+          }
+        });
+      });
+    </script>
+
+    <script>
+      const header = document.querySelector(".site-header");
+      const nav = header.querySelector("nav");
+
+      // How far the nav must travel to reach the middle of the screen
+      function measureNav() {
+        const natural = nav.offsetLeft + nav.offsetWidth / 2;
+        header.style.setProperty(
+          "--nav-shift",
+          header.clientWidth / 2 - natural + "px",
+        );
+      }
+
+      function updateHeader() {
+        const y = window.scrollY;
+        if (y > 60) header.classList.add("scrolled");
+        else if (y < 20) header.classList.remove("scrolled");
+      }
+
+      window.addEventListener("scroll", updateHeader, { passive: true });
+      window.addEventListener("resize", measureNav);
+      window.addEventListener("load", measureNav);
+      if (document.fonts) document.fonts.ready.then(measureNav);
+
+      measureNav();
+      updateHeader();
     </script>
   </body>
 </html>

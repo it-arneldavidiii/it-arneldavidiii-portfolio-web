@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <script src="transition.js"></script>
+    <script>
+      document.documentElement.classList.add("js");
+    </script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <title>Arnel David III | About</title>
+    <meta
+      name="description"
+      content="Junior web developer with 3+ years of experience in customer service and technical support."
+    />
+    <meta
+      name="description"
+      content="Your Name: a one-line summary of what you do and who you help."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Urbanist:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="about.css" />
+  </head>
+
+  <body>
+    <header class="site-header">
+      <a class="logo">Arnel David III</a>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="about.html" aria-current="page">About</a>
+        <a href="index.html#contact">Contact</a>
+      </nav>
+    </header>
+
+    <main></main>
+
+    <script>
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("visible");
+              observer.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.15 },
+      );
+
+      document
+        .querySelectorAll(".reveal")
+        .forEach((el) => observer.observe(el));
+    </script>
+
+    <script>
+      const DURATION = 1200;
+
+      function easeInOut(t) {
+        return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+      }
+
+      function scrollToY(end) {
+        const start = window.scrollY;
+        const distance = end - start;
+        const startTime = performance.now();
+
+        function step(now) {
+          const progress = Math.min((now - startTime) / DURATION, 1);
+          window.scrollTo(0, start + distance * easeInOut(progress));
+          if (progress < 1) requestAnimationFrame(step);
+        }
+
+        requestAnimationFrame(step);
+      }
+
+      function scrollToTarget(target) {
+        const offset = 90;
+        scrollToY(target.getBoundingClientRect().top + window.scrollY - offset);
+      }
+      s;
+      document.querySelectorAll('a[href^="#"]').forEach((link) => {
+        link.addEventListener("click", (e) => {
+          const target = document.querySelector(link.getAttribute("href"));
+          if (!target) return;
+          e.preventDefault();
+          scrollToTarget(target);
+        });
+      });
+
+      document.querySelectorAll(".logo, nav a").forEach((link) => {
+        link.addEventListener("click", (e) => {
+          const href = link.getAttribute("href");
+          if (!href || href.startsWith("#") || link.target === "_blank") return;
+
+          const normalize = (path) => path.replace(/\/$/, "/index.html");
+          const url = new URL(href, location.href);
+
+          if (
+            normalize(url.pathname) === normalize(location.pathname) &&
+            !url.hash
+          ) {
+            e.preventDefault();
+            scrollToY(0);
+          }
+        });
+      });
+    </script>
+
+    <script>
+      const header = document.querySelector(".site-header");
+      const nav = header.querySelector("nav");
+
+      function measureNav() {
+        const natural = nav.offsetLeft + nav.offsetWidth / 2;
+        header.style.setProperty(
+          "--nav-shift",
+          header.clientWidth / 2 - natural + "px",
+        );
+      }
+
+      function updateHeader() {
+        const y = window.scrollY;
+        if (y > 60) header.classList.add("scrolled");
+        else if (y < 20) header.classList.remove("scrolled");
+      }
+
+      window.addEventListener("scroll", updateHeader, { passive: true });
+      window.addEventListener("resize", measureNav);
+      window.addEventListener("load", measureNav);
+      if (document.fonts) document.fonts.ready.then(measureNav);
+
+      measureNav();
+      updateHeader();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,361 @@
+/* -- MAIN CSS -- */
+
+:root {
+  color-scheme: dark;
+  --bg: #12181f;
+  --bar: #1b2430;
+  --glow: 92, 196, 192;
+  --ink: #eef2f5;
+  --muted: #a3afbc;
+  --accent: #5cc4c0;
+  --line: #2a3541;
+  --shadow: rgba(0, 0, 0, 0.45);
+  --font: "Urbanist", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --header-h: 5rem;
+  --bar-h: 3.25rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #12181f;
+    --bar: #1b2430;
+    --glow: 92, 196, 192;
+    --ink: #eef2f5;
+    --muted: #a3afbc;
+    --accent: #5cc4c0;
+    --line: #2a3541;
+    --shadow: rgba(0, 0, 0, 0.45);
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  padding-top: var(--header-h);
+  margin: 0;
+  position: relative;
+  overflow-x: clip;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+body::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 85% 0%, rgba(var(--glow), 0.2), transparent 45%),
+    radial-gradient(circle at 0% 70%, rgba(var(--glow), 0.1), transparent 45%);
+  animation: glow-in 2.2s ease-out both;
+}
+
+@keyframes glow-in {
+  from {
+    opacity: 0;
+    transform: scale(1.25);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::before {
+    animation: none;
+  }
+}
+
+a {
+  color: inherit;
+}
+
+a:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* main margins */
+
+main,
+.site-footer {
+  width: min(100% - 1.5rem, 75rem);
+  margin-inline: auto;
+}
+
+/* header bar design config */
+
+[hidden] {
+  display: none !important;
+}
+
+.site-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  height: var(--header-h);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-inline: max(1.25rem, calc((100% - 75rem) / 2));
+}
+
+/* The bar is its own layer, so the logo and nav never get re-laid out while it morphs */
+.site-header::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: -1;
+  background: color-mix(in srgb, var(--bar) 60%, transparent);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  backdrop-filter: blur(14px) saturate(140%);
+  border: 1px solid transparent;
+  border-bottom-color: var(--line);
+  border-radius: 0;
+  transition:
+    top 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    bottom 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    left 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    right 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    border-radius 0.55s ease,
+    border-color 0.55s ease,
+    background-color 0.55s ease,
+    box-shadow 0.55s ease;
+}
+
+.site-header.scrolled::before {
+  top: calc((var(--header-h) - var(--bar-h)) / 2);
+  bottom: calc((var(--header-h) - var(--bar-h)) / 2);
+  left: max(0.75rem, calc((100% - 62rem) / 2));
+  right: max(0.75rem, calc((100% - 62rem) / 2));
+  border-color: rgba(var(--glow), 0.3);
+  border-radius: 0.9rem;
+  background: color-mix(in srgb, var(--bar) 75%, transparent);
+  box-shadow: 0 10px 30px var(--shadow);
+}
+
+/* Logo: slides out to the left (transform + opacity only) */
+.logo {
+  font-size: 1.5rem;
+  font-weight: 250;
+  text-decoration: none;
+  animation: logo-in 0.9s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  transition:
+    transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.35s ease;
+  will-change: transform, opacity;
+}
+
+.site-header.scrolled .logo {
+  opacity: 0;
+  transform: translateX(-3.5rem);
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.35s ease,
+    visibility 0s linear 0.55s;
+}
+
+/* Nav: glides to the middle (distance is measured by the script below) */
+nav {
+  display: flex;
+  gap: 2rem;
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+.site-header.scrolled nav {
+  transform: translateX(var(--nav-shift, 0px)) scale(0.94);
+}
+
+nav a {
+  color: var(--muted);
+  font-weight: 500;
+  text-decoration: none;
+  transition:
+    color 0.25s ease,
+    transform 0.25s ease;
+  animation: nav-in 0.8s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+nav a:nth-child(1) {
+  animation-delay: 0.2s;
+}
+nav a:nth-child(2) {
+  animation-delay: 0.3s;
+}
+nav a:nth-child(3) {
+  animation-delay: 0.4s;
+}
+nav a:nth-child(4) {
+  animation-delay: 0.5s;
+}
+
+nav a[aria-current="page"] {
+  position: relative;
+  color: var(--ink);
+}
+
+nav a[aria-current="page"]::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -6px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--accent);
+}
+
+nav a:hover {
+  color: white;
+  transform: translateY(-2px);
+}
+
+@keyframes logo-in {
+  from {
+    opacity: 0;
+    transform: translateX(-60px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes nav-in {
+  from {
+    opacity: 0;
+    transform: translateX(60px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Phones: keep the logo and nav in their normal places */
+@media (max-width: 640px) {
+  :root {
+    --header-h: 4rem;
+    --bar-h: 2.75rem;
+  }
+  .site-header {
+    padding-inline: 1rem;
+  }
+  .logo {
+    font-size: 1.15rem;
+  }
+  nav {
+    gap: 0.9rem;
+  }
+  nav a {
+    font-size: 0.88rem;
+  }
+  .site-header.scrolled .logo {
+    opacity: 1;
+    transform: none;
+    visibility: visible;
+    pointer-events: auto;
+  }
+  .site-header.scrolled nav {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-header::before,
+  .logo,
+  nav {
+    transition: none;
+  }
+  .logo,
+  nav a {
+    animation: none;
+  }
+}
+
+h1 {
+  margin: 0 0 1.25rem;
+  font-weight: 500;
+  font-size: clamp(2.25rem, 7vw, 3.75rem);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+}
+
+.lead {
+  max-width: 36rem;
+  margin: 0 0 2rem;
+  color: var(--muted);
+  font-size: 1.1875rem;
+}
+
+/*  Section headings  */
+h2 {
+  margin: 0 0 1rem;
+  font-size: 1.5rem;
+}
+
+@media (max-width: 640px) {
+  .site-header {
+    padding: 0.75rem 1rem;
+  }
+  nav {
+    gap: 1rem;
+  }
+  .logo {
+    font-size: 1.25rem;
+  }
+}
+
+@media (min-width: 641px) {
+  .logo {
+    transition:
+      font-size 0.45s ease,
+      opacity 0.35s ease,
+      transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .site-header.scrolled .logo {
+    opacity: 0;
+    transform: translateX(-60px);
+    visibility: hidden;
+    pointer-events: none;
+    transition:
+      font-size 0.45s ease,
+      opacity 0.35s ease,
+      transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+      visibility 0s linear 0.45s;
+  }
+
+  nav {
+    position: absolute;
+    top: 50%;
+    left: calc(100% - max(1.25rem, calc((100% - 75rem) / 2)));
+    transform: translate(-100%, -50%);
+    white-space: nowrap;
+    transition:
+      left 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .site-header.scrolled nav {
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+}
