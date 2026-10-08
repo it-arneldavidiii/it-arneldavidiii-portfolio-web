@@ -133,42 +133,340 @@
   border-top: 1px solid var(--line);
 }
 
-/*  Featured work (rows, not boxes)  */
-.work-list {
+/* ---------- Professional experience (expandable rows) ----------
+   Paste this into home.css in place of the old "Featured work" rules. */
+
+.jobs {
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.work-list li + li {
+.job {
+  position: relative;
+  isolation: isolate;
   border-top: 1px solid var(--line);
 }
 
-.work-list a {
-  display: block;
-  padding-block: 1.25rem;
-  text-decoration: none;
+.job:first-child {
+  border-top: 0;
 }
 
-.work-list h3 {
-  margin: 0 0 0.25rem;
-  font-size: 1.25rem;
+/* Soft teal wash behind an open row: fades in slowly, fades out a bit quicker */
+.job::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: 0.75rem;
+  background: linear-gradient(90deg, rgba(var(--glow), 0.1), transparent 75%);
+  opacity: 0;
+  transition: opacity 0.35s ease;
 }
 
-.work-list a:hover h3 {
-  color: var(--accent);
-  text-decoration: underline;
+.job.open::after {
+  opacity: 1;
+  transition: opacity 0.7s ease;
 }
 
-.work-list p {
-  margin: 0 0 0.5rem;
+/* Accent bar: grows down when a row opens, retracts downward when it closes */
+.job::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.9rem;
+  bottom: 0.9rem;
+  width: 3px;
+  border-radius: 3px;
+  background: linear-gradient(var(--accent), rgba(var(--glow), 0.15));
+  transform: scaleY(0);
+  transform-origin: bottom;
+  transition: transform 0.4s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.job.open::before {
+  transform: scaleY(1);
+  transform-origin: top;
+  transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ---------- The clickable row ---------- */
+.job-heading {
+  margin: 0;
+  font: inherit;
+}
+
+.job-head {
+  display: grid;
+  grid-template-columns: 9rem 1fr 2.25rem;
+  column-gap: 1.25rem;
+  align-items: start;
+  width: 100%;
+  padding: 1.4rem 1rem;
+  border: 0;
+  border-radius: 0.75rem;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.job-head:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: -3px;
+}
+
+.job-date {
+  padding-top: 0.2rem;
   color: var(--muted);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
-.tags {
+.job-company {
+  display: block;
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.3;
+  transition:
+    color 0.25s ease,
+    transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.job-role {
+  display: block;
+  margin-top: 0.15rem;
   color: var(--accent);
-  font-size: 0.9375rem;
   font-weight: 500;
+}
+
+.job-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.7rem;
+}
+
+.job-chips span {
+  padding: 0.1rem 0.7rem;
+  border: 1px solid rgba(var(--glow), 0.35);
+  border-radius: 2rem;
+  color: var(--accent);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.job-head:hover .job-company,
+.job.open .job-company {
+  color: var(--accent);
+  transform: translateX(6px);
+}
+
+/* ---------- The round chevron button ---------- */
+.job-toggle {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  margin-top: 0.1rem;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  color: var(--accent);
+  transition:
+    background-color 0.35s ease,
+    border-color 0.35s ease,
+    color 0.35s ease,
+    box-shadow 0.35s ease;
+}
+
+.job-toggle svg {
+  width: 1.1rem;
+  height: 1.1rem;
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.job-head:hover .job-toggle {
+  border-color: var(--accent);
+}
+
+.job.open .job-toggle {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--bg);
+  box-shadow: 0 0 18px rgba(var(--glow), 0.45);
+}
+
+.job.open .job-toggle svg {
+  transform: rotate(180deg);
+}
+
+/* Ring that ripples outward when a row closes (the "closing" class is set by the script) */
+.job-toggle::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border: 2px solid var(--accent);
+  border-radius: 50%;
+  opacity: 0;
+}
+
+.job.closing .job-toggle::after {
+  animation: job-ring 0.7s ease-out;
+}
+
+@keyframes job-ring {
+  from {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.9);
+  }
+}
+
+/* ---------- The sliding panel with your responsibilities ---------- */
+.job-body {
+  display: grid;
+  grid-template-rows: 0fr;
+  visibility: hidden;
+  /* closing: quicker and firmer */
+  transition:
+    grid-template-rows 0.45s cubic-bezier(0.65, 0, 0.35, 1),
+    visibility 0s linear 0.45s;
+}
+
+.job.open .job-body {
+  grid-template-rows: 1fr;
+  visibility: visible;
+  /* opening: longer and softer */
+  transition:
+    grid-template-rows 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    visibility 0s;
+}
+
+.job-inner {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.job-points {
+  margin: 0;
+  padding: 0 3.5rem 1.6rem calc(1rem + 9rem + 1.25rem);
+  list-style: none;
+}
+
+/* Bullets fade out fast when closing... */
+.job-points li {
+  position: relative;
+  max-width: 46rem;
+  margin: 0 0 0.7rem;
+  padding-left: 1.25rem;
+  color: var(--muted);
+  opacity: 0;
+  transform: translateY(10px);
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+.job-points li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.7em;
+  width: 0.5rem;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--accent);
+}
+
+/* ...and rise in one after another when opening */
+.job.open .job-points li {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 0.55s ease,
+    transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: calc(var(--i, 0) * 80ms + 180ms);
+}
+
+.job-points li:nth-child(2) {
+  --i: 1;
+}
+.job-points li:nth-child(3) {
+  --i: 2;
+}
+.job-points li:nth-child(4) {
+  --i: 3;
+}
+
+/* ---------- Phones ---------- */
+@media (max-width: 640px) {
+  .job-head {
+    grid-template-columns: 1fr 2.25rem;
+    padding: 1.2rem 0.75rem;
+  }
+  .job-date {
+    grid-column: 1 / -1;
+    padding: 0 0 0.4rem;
+  }
+  .job-date br {
+    display: none;
+  }
+  .job-points {
+    padding: 0 1rem 1.4rem 0.75rem;
+  }
+}
+
+.js .jobs .job {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 0.7s ease,
+    transform 0.7s ease;
+}
+
+.js .featured.visible .jobs .job {
+  opacity: 1;
+  transform: none;
+}
+
+.js .featured.visible .jobs .job:nth-child(2) {
+  transition-delay: 0.12s;
+}
+.js .featured.visible .jobs .job:nth-child(3) {
+  transition-delay: 0.24s;
+}
+.js .featured.visible .jobs .job:nth-child(4) {
+  transition-delay: 0.36s;
+}
+.js .featured.visible .jobs .job:nth-child(5) {
+  transition-delay: 0.48s;
+}
+.js .featured.visible .jobs .job:nth-child(6) {
+  transition-delay: 0.6s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .job,
+  .job::before,
+  .job::after,
+  .job *,
+  .job-toggle::after {
+    transition: none !important;
+    animation: none !important;
+  }
+  .job-points li,
+  .js .jobs .job {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 /*  Skills  */
@@ -203,47 +501,4 @@
   margin-bottom: 1rem;
   font-size: clamp(1.25rem, 3vw, 2rem);
   font-weight: 700;
-}
-
-.js .reveal {
-  opacity: 0;
-  transform: translateY(40px);
-  transition:
-    opacity 0.8s ease,
-    transform 0.8s ease;
-}
-
-.js .reveal.visible {
-  opacity: 1;
-  transform: none;
-}
-
-.js .work-list li {
-  opacity: 0;
-  transform: translateY(24px);
-  transition:
-    opacity 0.7s ease,
-    transform 0.7s ease;
-}
-
-.js .featured.visible .work-list li {
-  opacity: 1;
-  transform: none;
-}
-
-.js .featured.visible .work-list li:nth-child(2) {
-  transition-delay: 0.15s;
-}
-
-.js .featured.visible .work-list li:nth-child(3) {
-  transition-delay: 0.3s;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .js .reveal,
-  .js .work-list li {
-    opacity: 1;
-    transform: none;
-    transition: none;
-  }
 }

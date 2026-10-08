@@ -15,19 +15,6 @@
   --bar-h: 3.25rem;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #12181f;
-    --bar: #1b2430;
-    --glow: 92, 196, 192;
-    --ink: #eef2f5;
-    --muted: #a3afbc;
-    --accent: #5cc4c0;
-    --line: #2a3541;
-    --shadow: rgba(0, 0, 0, 0.45);
-  }
-}
-
 * {
   box-sizing: border-box;
 }
@@ -311,51 +298,45 @@ h2 {
   font-size: 1.5rem;
 }
 
-@media (max-width: 640px) {
-  .site-header {
-    padding: 0.75rem 1rem;
-  }
-  nav {
-    gap: 1rem;
-  }
-  .logo {
-    font-size: 1.25rem;
-  }
+.js .reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition:
+    opacity 0.8s ease,
+    transform 0.8s ease;
 }
 
-@media (min-width: 641px) {
-  .logo {
-    transition:
-      font-size 0.45s ease,
-      opacity 0.35s ease,
-      transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
-  }
+.js .reveal.visible {
+  opacity: 1;
+  transform: none;
+}
 
-  .site-header.scrolled .logo {
-    opacity: 0;
-    transform: translateX(-60px);
-    visibility: hidden;
-    pointer-events: none;
-    transition:
-      font-size 0.45s ease,
-      opacity 0.35s ease,
-      transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
-      visibility 0s linear 0.45s;
-  }
+.js .work-list li {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 0.7s ease,
+    transform 0.7s ease;
+}
 
-  nav {
-    position: absolute;
-    top: 50%;
-    left: calc(100% - max(1.25rem, calc((100% - 75rem) / 2)));
-    transform: translate(-100%, -50%);
-    white-space: nowrap;
-    transition:
-      left 0.45s cubic-bezier(0.22, 1, 0.36, 1),
-      transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
-  }
+.js .featured.visible .work-list li {
+  opacity: 1;
+  transform: none;
+}
 
-  .site-header.scrolled nav {
-    left: 50%;
-    transform: translate(-50%, -50%);
+.js .featured.visible .work-list li:nth-child(2) {
+  transition-delay: 0.15s;
+}
+
+.js .featured.visible .work-list li:nth-child(3) {
+  transition-delay: 0.3s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .js .reveal,
+  .js .work-list li {
+    opacity: 1;
+    transform: none;
+    transition: none;
   }
 }
